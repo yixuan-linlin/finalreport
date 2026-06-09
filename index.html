@@ -7,359 +7,361 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #2c3e50;
-            --secondary: #3498db;
-            --bg-color: #f8f9fa;
+            /* 淡粉綠色系 */
+            --bg-sidebar: #e8f5e9; /* 淡綠色 */
+            --bg-main: #fce4ec; /* 淡粉色 */
+            --primary-green: #81c784;
+            --primary-pink: #f06292;
             --card-bg: #ffffff;
-            --text-main: #333333;
-            --text-muted: #666666;
-            --accent: #e74c3c;
+            --text-main: #424242;
+            --text-light: #757575;
         }
 
         body {
             font-family: 'Noto Sans TC', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
             margin: 0;
             padding: 0;
-            line-height: 1.6;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            color: var(--text-main);
         }
 
-        /* 頂部橫幅 */
-        header {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            padding: 4rem 2rem;
-            text-align: center;
-            box-shadow: 0 5px 16px rgba(0,0,0,0.1);
-        }
-
-        header h1 {
-            margin: 0;
-            font-size: 2.5rem;
-            letter-spacing: 3px;
-        }
-
-        header p {
-            margin-top: 10px;
-            font-size: 1.2rem;
-            opacity: 0.9;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: -50px auto 60px;
-            padding: 0 20px;
-            position: relative;
+        /* 左側邊欄 (小項目列表) */
+        .sidebar {
+            width: 380px;
+            background-color: var(--bg-sidebar);
+            height: 100%;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
             z-index: 10;
         }
 
-        /* 時間軸 / 卡片列表設計 */
-        .timeline {
-            display: flex;
-            flex-direction: column;
-            gap: 50px;
+        .sidebar-header {
+            background: linear-gradient(135deg, var(--primary-green), #aed581);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        .card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            border-left: 5px solid var(--secondary);
-            transition: all 0.3s ease;
+        .sidebar-header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            letter-spacing: 2px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .sidebar-header p {
+            margin: 10px 0 0 0;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .timeline {
+            padding: 20px;
             display: flex;
             flex-direction: column;
             gap: 15px;
         }
 
+        /* 左側卡片 */
+        .card {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-left: 5px solid var(--primary-pink);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
         .card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-            border-left-color: var(--accent);
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
         .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
+            margin-bottom: 10px;
         }
 
         .date {
-            background-color: #e8f4fd;
-            color: var(--secondary);
-            padding: 5px 12px;
-            border-radius: 50px;
-            font-size: 0.9rem;
+            display: inline-block;
+            background-color: #f8bbd0; /* 粉色標籤 */
+            color: #c2185b;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
             font-weight: 500;
+            margin-bottom: 8px;
         }
 
         .title {
-            font-size: 1.2rem;
+            font-size: 1.05rem;
             font-weight: 700;
             margin: 0;
-            color: var(--primary);
+            color: var(--text-main);
+            line-height: 1.4;
         }
 
-        /* 按鈕群組 */
+        /* 按鈕樣式 */
         .actions {
             display: flex;
-            gap: 30px;
+            gap: 8px;
             flex-wrap: wrap;
+            margin-top: 10px;
         }
 
         .btn {
+            background-color: var(--primary-green);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            text-decoration: none;
             display: inline-flex;
             align-items: center;
+        }
+
+        .btn:hover {
+            background-color: #66bb6a;
+        }
+
+        .btn-pink {
+            background-color: var(--primary-pink);
+        }
+        .btn-pink:hover {
+            background-color: #e91e63;
+        }
+
+        /* 右側主畫面 (呈現內容) */
+        .main-content {
+            flex: 1;
+            background-color: var(--bg-main);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             justify-content: center;
-            padding: 8px 16px;
-            border-radius: 6px;
+        }
+
+        /* 小視窗顯示區域 */
+        .viewer-window {
+            width: 95%;
+            height: 95%;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .viewer-header {
+            background-color: #f5f5f5;
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .viewer-title {
+            font-weight: 700;
+            color: var(--text-main);
+            font-size: 1.1rem;
+        }
+
+        .btn-new-tab {
+            background-color: var(--primary-pink);
+            color: white;
             text-decoration: none;
-            font-size: 0.95rem;
-            font-weight: 500;
-            transition: all 0.2s;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            display: none; /* 預設隱藏，有內容時顯示 */
         }
 
-        .btn-link {
-            background-color: var(--primary);
-            color: white;
+        .btn-new-tab:hover {
+            background-color: #e91e63;
         }
 
-        .btn-link:hover {
-            background-color: #1a252f;
-        }
-
-        .btn-pdf {
-            background-color: #e74c3c;
-            color: white;
-        }
-
-        .btn-pdf:hover {
-            background-color: #c0392b;
-        }
-
-        .btn-image {
-            background-color: #27ae60;
-            color: white;
-        }
-
-        .btn-image:hover {
-            background-color: #219150;
-        }
-
-        /* PDF 預覽模態框 (Modal) 樣式 */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 999;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.8);
-        }
-
-        .modal-content {
-            background-color: #fff;
-            margin: 2% auto;
-            padding: 10px;
-            width: 90%;
-            max-width: 1000px;
-            height: 85vh;
-            border-radius: 8px;
+        .viewer-body {
+            flex: 1;
+            background-color: #fafafa;
             position: relative;
-        }
-
-        .close-btn {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-right: 10px;
-        }
-
-        .close-btn:hover {
-            color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         iframe {
-            width: 100%;
-            height: calc(100% - 40px);
+            width: calc(100% / 0.9);
+            height: calc(100% / 0.9);
+            transform: scale(0.9);
+            transform-origin: top left;
             border: none;
-            border-radius: 4px;
+            display: none; /* 預設隱藏 */
         }
 
-        /* 響應式 */
-        @media (max-width: 600px) {
-            .card-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
+        .empty-state {
+            color: var(--text-light);
+            text-align: center;
+            font-size: 1.2rem;
         }
+
+        .empty-state span {
+            display: block;
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>地震學期末報告</h1>
-        <p>學習歷程檔案</p>
-    </header>
-
-    <div class="container">
+    <!-- 左側選單 -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h1>地震學期末報告</h1>
+            <p>學習歷程檔案</p>
+        </div>
+        
         <div class="timeline">
-
             <!-- 作業1 -->
             <div class="card">
-                <div class="card-header">
-                    <h3 class="title">作業1-軟體安裝與帳號申請</h3>
-                    <span class="date">02/25</span>
-                </div>
+                <div class="date">02/25</div>
+                <h3 class="title">作業1-軟體安裝與帳號申請</h3>
                 <div class="actions">
-                    <a href="安裝antigravity.png" target="_blank" class="btn btn-image">📸 安裝antigravity</a>
-                    <a href="安裝github.png" target="_blank" class="btn btn-image">📸 安裝github</a>
-                    <a href="安裝hugging face.png" target="_blank" class="btn btn-image">📸 安裝hugging face</a>
+                    <button class="btn" onclick="openContent('安裝antigravity.png', '作業1 - 安裝antigravity')">📸 圖片 1</button>
+                    <button class="btn" onclick="openContent('安裝github.png', '作業1 - 安裝github')">📸 圖片 2</button>
+                    <button class="btn" onclick="openContent('安裝hugging face.png', '作業1 - 安裝hugging face')">📸 圖片 3</button>
                 </div>
             </div>
 
             <!-- 作業2 -->
             <div class="card">
-                <div class="card-header">
-                    <h3 class="title">作業2-介紹地震學課本第一章-部屬網頁在github pages</h3>
-                    <span class="date">03/04</span>
-                </div>
+                <div class="date">03/04</div>
+                <h3 class="title">作業2-介紹地震學課本第一章</h3>
                 <div class="actions">
-                    <a href="https://yixuan-linlin.github.io/seismology_ch1/" target="_blank" class="btn btn-link">🔗 前往外部連結</a>
+                    <button class="btn btn-pink" onclick="openContent('https://yixuan-linlin.github.io/seismology_ch1/', '作業2 - 部屬網頁在github pages')">🔗 開啟外部連結</button>
                 </div>
             </div>
 
             <!-- 作業3 -->
             <div class="card">
-                <div class="card-header">
-                    <h3 class="title">作業3-張睿明老師演講心得</h3>
-                    <span class="date">03/11</span>
-                </div>
+                <div class="date">03/11</div>
+                <h3 class="title">作業3-張睿明老師演講心得</h3>
                 <div class="actions">
-                    <button onclick="openPdf('作業3-張睿明老師演講心得.pdf')" class="btn btn-pdf">📄 開啟 PDF</button>
-                    <a href="作業3-張睿明老師演講心得.pdf" download class="btn btn-pdf" style="background-color: #95a5a6;">⬇️ 下載</a>
+                    <button class="btn btn-pink" onclick="openContent('作業3-張睿明老師演講心得.pdf', '作業3 - 張睿明老師演講心得')">📄 開啟 PDF</button>
                 </div>
             </div>
 
             <!-- 作業4 -->
             <div class="card">
-                <div class="card-header">
-                    <h3 class="title">作業4-地震學實驗心得分享</h3>
-                    <span class="date">03/25</span>
-                </div>
+                <div class="date">03/25</div>
+                <h3 class="title">作業4-地震學實驗心得分享</h3>
                 <div class="actions">
-                    <button onclick="openPdf('作業4-地震學實驗心得分享.pdf')" class="btn btn-pdf">📄 開啟 PDF</button>
-                    <a href="作業4-地震學實驗心得分享.pdf" download class="btn btn-pdf" style="background-color: #95a5a6;">⬇️ 下載</a>
+                    <button class="btn btn-pink" onclick="openContent('作業4-地震學實驗心得分享.pdf', '作業4 - 地震學實驗心得分享')">📄 開啟 PDF</button>
                 </div>
             </div>
 
             <!-- 作業5 -->
             <div class="card">
-                <div class="card-header">
-                    <h3 class="title">作業5-參觀國家地震工程研究中心-心得分享</h3>
-                    <span class="date">04/01</span>
-                </div>
+                <div class="date">04/01</div>
+                <h3 class="title">作業5-參觀國家地震工程研究中心</h3>
                 <div class="actions">
-                    <button onclick="openPdf('作業5-參觀國家地震工程研究中心-心得分享.pdf')" class="btn btn-pdf">📄 開啟 PDF</button>
-                    <a href="作業5-參觀國家地震工程研究中心-心得分享.pdf" download class="btn btn-pdf" style="background-color: #95a5a6;">⬇️ 下載</a>
+                    <button class="btn btn-pink" onclick="openContent('作業5-參觀國家地震工程研究中心-心得分享.pdf', '作業5 - 參觀國家地震工程研究中心心得')">📄 開啟 PDF</button>
                 </div>
             </div>
 
             <!-- 作業6 -->
             <div class="card">
-                <div class="card-header">
-                    <h3 class="title">作業6-宋冠毅老師演講心得</h3>
-                    <span class="date">04/22</span>
-                </div>
+                <div class="date">04/22</div>
+                <h3 class="title">作業6-宋冠毅老師演講心得</h3>
                 <div class="actions">
-                    <button onclick="openPdf('作業6-宋冠毅老師演講心得.pdf')" class="btn btn-pdf">📄 開啟 PDF</button>
-                    <a href="作業6-宋冠毅老師演講心得.pdf" download class="btn btn-pdf" style="background-color: #95a5a6;">⬇️ 下載</a>
+                    <button class="btn btn-pink" onclick="openContent('作業6-宋冠毅老師演講心得.pdf', '作業6 - 宋冠毅老師演講心得')">📄 開啟 PDF</button>
                 </div>
             </div>
 
             <!-- 作業7 -->
             <div class="card">
-                <div class="card-header">
-                    <h3 class="title">作業7-地震學第3章報告</h3>
-                    <span class="date">04/29</span>
-                </div>
+                <div class="date">04/29</div>
+                <h3 class="title">作業7-地震學第3章報告</h3>
                 <div class="actions">
-                    <a href="https://huggingface.co/spaces/yixuan-08006/seismology-ch3" target="_blank" class="btn btn-link">🔗 前往外部連結</a>
+                    <button class="btn btn-pink" onclick="openContent('https://huggingface.co/spaces/yixuan-08006/seismology-ch3', '作業7 - 地震學第3章報告')">🔗 開啟外部連結</button>
                 </div>
             </div>
 
             <!-- 作業8 -->
             <div class="card">
-                <div class="card-header">
-                    <h3 class="title">作業8-繪製震源機制球</h3>
-                    <span class="date">05/06</span>
-                </div>
+                <div class="date">05/06</div>
+                <h3 class="title">作業8-繪製震源機制球</h3>
                 <div class="actions">
-                    <button onclick="openPdf('作業8-繪製震源機制球.pdf')" class="btn btn-pdf">📄 開啟 PDF</button>
-                    <a href="作業8-繪製震源機制球.pdf" download class="btn btn-pdf" style="background-color: #95a5a6;">⬇️ 下載</a>
+                    <button class="btn btn-pink" onclick="openContent('作業8-繪製震源機制球.pdf', '作業8 - 繪製震源機制球')">📄 開啟 PDF</button>
                 </div>
             </div>
 
             <!-- 作業9 -->
             <div class="card">
-                <div class="card-header">
-                    <h3 class="title">作業9-地震學第4章-4.1與4.2報告</h3>
-                    <span class="date">05/13</span>
-                </div>
+                <div class="date">05/13</div>
+                <h3 class="title">作業9-地震學第4章-4.1與4.2報告</h3>
                 <div class="actions">
-                    <a href="https://huggingface.co/spaces/yixuan-08006/seismic4" target="_blank" class="btn btn-link">🔗 前往外部連結</a>
+                    <button class="btn btn-pink" onclick="openContent('https://huggingface.co/spaces/yixuan-08006/seismic4', '作業9 - 地震學第4章報告')">🔗 開啟外部連結</button>
                 </div>
             </div>
 
             <!-- 作業10 -->
             <div class="card">
-                <div class="card-header">
-                    <h3 class="title">作業10-初動解繪製震源機制</h3>
-                    <span class="date">05/20</span>
-                </div>
+                <div class="date">05/20</div>
+                <h3 class="title">作業10-初動解繪製震源機制</h3>
                 <div class="actions">
-                    <!-- 使用相對路徑，讓此檔案也能在 GitHub Pages 上運作 -->
-                    <a href="beachball_demo.html" target="_blank" class="btn btn-link">🔗 觀看本地網頁 (beachball_demo.html)</a>
+                    <!-- 改為相對路徑並直接在右側小視窗開啟 -->
+                    <button class="btn btn-pink" onclick="openContent('beachball_demo.html', '作業10 - 初動解繪製震源機制 (beachball_demo.html)')">🔗 開啟本地網頁</button>
                 </div>
             </div>
-
         </div>
     </div>
 
-    <!-- 顯示 PDF 的 Modal -->
-    <div id="pdfModal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closePdf()">&times;</span>
-            <iframe id="pdfFrame" src=""></iframe>
+    <!-- 右側主要顯示區域 -->
+    <div class="main-content">
+        <div class="viewer-window">
+            <div class="viewer-header">
+                <div class="viewer-title" id="display-title">歡迎！請從左側點選作業</div>
+                <a href="#" id="new-tab-btn" target="_blank" class="btn-new-tab">在新分頁開啟 (若無法顯示請點此)</a>
+            </div>
+            <div class="viewer-body">
+                <div id="empty-state" class="empty-state">
+                    <span>👈</span>
+                    點擊左側的按鈕，<br>內容將會顯示在這裡！
+                </div>
+                <iframe id="display-frame" src=""></iframe>
+            </div>
         </div>
     </div>
 
     <script>
-        // 開啟 PDF Modal
-        function openPdf(filename) {
-            document.getElementById('pdfFrame').src = filename;
-            document.getElementById('pdfModal').style.display = 'block';
-        }
+        function openContent(url, title) {
+            // 更新標題
+            document.getElementById('display-title').innerText = title;
+            
+            // 隱藏空白提示
+            document.getElementById('empty-state').style.display = 'none';
+            
+            // 設定 iframe 網址並顯示
+            const iframe = document.getElementById('display-frame');
+            iframe.src = url;
+            iframe.style.display = 'block';
 
-        // 關閉 PDF Modal
-        function closePdf() {
-            document.getElementById('pdfModal').style.display = 'none';
-            document.getElementById('pdfFrame').src = '';
-        }
-
-        // 點擊 Modal 背景也可關閉
-        window.onclick = function(event) {
-            const modal = document.getElementById('pdfModal');
-            if (event.target == modal) {
-                closePdf();
-            }
+            // 設定「在新分頁開啟」按鈕的網址並顯示
+            const newTabBtn = document.getElementById('new-tab-btn');
+            newTabBtn.href = url;
+            newTabBtn.style.display = 'block';
         }
     </script>
 </body>
