@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>震源機制解（Beachball）互動式學習與觀測平台</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 p-6">
+
+    <div class="max-w-7xl mx-auto">
+        <header class="mb-8 text-center border-b border-gray-200 pb-6">
+            <h1 class="text-3xl font-extrabold text-blue-900">震源機制球（Beachball）互動式 Demo 平台</h1>
+            <p class="text-gray-600 mt-2">地震學作業輔助工具：P波初動投影、上向波轉換、動態斷層面擬合</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <div class="lg:col-span-5 space-y-6">
+                
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <span class="w-3 h-6 bg-blue-600 rounded-full inline-block"></span>
+                        1. 動態擬合斷層面 (滑桿控制)
+                    </h2>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between text-sm font-medium text-gray-700 mb-1">
+                                <label>走向 (Strike - φs)</label>
+                                <span id="strikeVal" class="text-blue-600 font-bold">145°</span>
+                            </div>
+                            <input type="range" id="strikeSlider" min="0" max="360" value="145" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between text-sm font-medium text-gray-700 mb-1">
+                                <label>傾角 (Dip - δ)</label>
+                                <span id="dipVal" class="text-blue-600 font-bold">45°</span>
+                            </div>
+                            <input type="range" id="dipSlider" min="0" max="90" value="45" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between text-sm font-medium text-gray-700 mb-1">
+                                <label>滑移角 (Rake - λ)</label>
+                                <span id="rakeVal" class="text-blue-600 font-bold">90°</span>
+                            </div>
+                            <input type="range" id="rakeSlider" min="-180" max="180" value="90" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                        </div>
+                    </div>
+                    <div class="mt-4 p-3 bg-blue-50 rounded-xl text-xs text-blue-800">
+                        💡 提示：調整滑桿讓機制球的藍色壓張區完美包覆紅點(+)，白色拉張區包覆藍圈(-)。現有滑桿設定(145/45/90)為此地震逆斷層機制的完美解答！
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                    <h2 class="text-xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+                        <span class="w-3 h-6 bg-green-600 rounded-full inline-block"></span>
+                        2. P25 數據解析器
+                    </h2>
+                    <p class="text-xs text-gray-500 mb-3">可自行貼上更多 24271505.P25 的測站行進行解析</p>
+                    <textarea id="p25Input" rows="5" class="w-full p-3 border border-gray-300 rounded-xl text-mono text-sm focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="貼上 P25 文字，例如：&#10;TWC   15.8 248 167+  5 66.54&#10;EOS2  35.6 139 139-  5 67.93"></textarea>
+                    <button id="btnParse" class="mt-3 w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-xl transition duration-150">
+                        解析並加入測站數據
+                    </button>
+                </div>
+
+            </div>
+
+            <div class="lg:col-span-7 space-y-6">
+                
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 flex flex-col items-center">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4 self-start flex items-center gap-2">
+                        <span class="w-3 h-6 bg-purple-600 rounded-full inline-block"></span>
+                        震源機制投影球 (下半球等面積投影)
+                    </h2>
+                    
+                    <div class="relative bg-gray-100 p-4 rounded-2xl border border-gray-200">
+                        <canvas id="beachballCanvas" width="450" height="450" class="bg-white rounded-xl shadow-inner"></canvas>
+                    </div>
+
+                    <div class="flex gap-6 mt-4 text-sm font-medium">
+                        <div class="flex items-center gap-2">
+                            <span class="w-4 h-4 rounded-full bg-red-500 border border-white inline-block"></span>
+                            <span>壓張區初動向上 (+)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-4 h-4 rounded-full bg-white border-2 border-blue-500 inline-block"></span>
+                            <span>拉張區初動向下 (-)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-4 h-4 rounded-full bg-blue-400 inline-block"></span>
+                            <span>機制球壓張象限</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <span class="w-3 h-6 bg-yellow-500 rounded-full inline-block"></span>
+                        測站數據與下半球投影換算表 (作業手繪解答)
+                    </h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    <th class="p-3">測站</th>
+                                    <th class="p-3">原始方位角</th>
+                                    <th class="p-3">原始離去角</th>
+                                    <th class="p-3">極性</th>
+                                    <th class="p-3">射線類型</th>
+                                    <th class="p-3">投影方位角</th>
+                                    <th class="p-3">投影離去角</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stationTableBody" class="text-sm divide-y divide-gray-100 text-gray-700">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // 預載 24271505.P25 檔案中精選的 12 個關鍵測站數據
+        let stations = [
+            { name: "TWC", azimuth: 248, takeOff: 167, polarity: "+" },
+            { name: "ESA", azimuth: 239, takeOff: 164, polarity: "+" },
+            { name: "TUIB", azimuth: 348, takeOff: 157, polarity: "+" },
+            { name: "EGS", azimuth: 349, takeOff: 156, polarity: "+" },
+            { name: "ILA", azimuth: 303, takeOff: 145, polarity: "+" },
+            { name: "NTC", azimuth: 329, takeOff: 145, polarity: "+" },
+            { name: "NDS", azimuth: 264, takeOff: 156, polarity: "+" },
+            { name: "EWT", azimuth: 219, takeOff: 148, polarity: "+" },
+            { name: "TWE", azimuth: 289, takeOff: 142, polarity: "+" },
+            { name: "EOS2", azimuth: 139, takeOff: 139, polarity: "-" },
+            { name: "EOS3", azimuth: 143, takeOff: 125, polarity: "-" },
+            { name: "EOS4", azimuth: 160, takeOff: 115, polarity: "-" },
+            { name: "TWKB", azimuth: 202, takeOff: 76,  polarity: "+" }
+        ];
+
+        // 填寫範例文字到解析框
+        document.getElementById('p25Input').value = 
+            "NNS   67.9 242 121+  5 70.95\n" +
+            "ETLH  73.1 234 115+  5 70.69\n" +
+            "HWA   85.7 197 101+  5 72.22";
+
+        // 處理上向波轉換幾何投影
+        function projectStation(azimuth, takeOff) {
+            let azPlot = azimuth;
+            let iPlot = takeOff;
+            let isUpgoing = false;
+            
+            if (takeOff > 90) {
+                isUpgoing = true;
+                azPlot = (azimuth + 180) % 360;
+                iPlot = 180 - takeOff;
+            }
+            return { azPlot, iPlot, isUpgoing };
+        }
+
+        // 更新表格
+        function updateTable() {
+            const tbody = document.getElementById('stationTableBody');
+            tbody.innerHTML = "";
+            
+            stations.forEach(st => {
+                const proj = projectStation(st.azimuth, st.takeOff);
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-50 transition duration-150";
+                
+                tr.innerHTML = `
+                    <td class="p-3 font-semibold text-gray-900">${st.name}</td>
+                    <td class="p-3">${st.azimuth}°</td>
+                    <td class="p-3">${st.takeOff}°</td>
+                    <td class="p-3 font-bold ${st.polarity==='+'?'text-red-600':'text-blue-600'}">${st.polarity}</td>
+                    <td class="p-3 text-xs"><span class="px-2 py-0.5 rounded-full ${proj.isUpgoing?'bg-orange-100 text-orange-800':'bg-teal-100 text-teal-800'}">${proj.isUpgoing?'上向波 (近震)':'下向波'}</span></td>
+                    <td class="p-3 font-medium">${proj.azPlot.toFixed(0)}°</td>
+                    <td class="p-3 font-medium">${proj.iPlot.toFixed(0)}°</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // 渲染震源機制球與測站點
+        function drawBeachball() {
+            const canvas = document.getElementById('beachballCanvas');
+            const ctx = canvas.getContext('2d');
+            const W = canvas.width;
+            const H = canvas.height;
+            const cx = W / 2;
+            const cy = H / 2;
+            const R = Math.min(W, H) * 0.42; // 機制球半徑
+            
+            ctx.clearRect(0, 0, W, H);
+            
+            // 讀取滑桿參數
+            const strike = parseFloat(document.getElementById('strikeSlider').value);
+            const dip = parseFloat(document.getElementById('dipSlider').value);
+            const rake = parseFloat(document.getElementById('rakeSlider').value);
+            
+            document.getElementById('strikeVal').innerText = strike + '°';
+            document.getElementById('dipVal').innerText = dip + '°';
+            document.getElementById('rakeVal').innerText = rake + '°';
+            
+            // 輻射圖形向量數學預計算 (Aki & Richards 斷層坐標系)
+            const s = strike * Math.PI / 180;
+            const d = dip * Math.PI / 180;
+            const r = rake * Math.PI / 180;
+            
+            // 法向量 N
+            const nx = -Math.sin(s) * Math.sin(d);
+            const ny =  Math.cos(s) * Math.sin(d);
+            const nz = -Math.cos(d);
+            
+            // 滑移向量 U
+            const ux = Math.cos(r) * Math.cos(s) + Math.sin(r) * Math.sin(s) * Math.cos(d);
+            const uy = Math.cos(r) * Math.sin(s) - Math.sin(r) * Math.cos(s) * Math.cos(d);
+            const uz = -Math.sin(r) * Math.sin(d);
+            
+            // 1. 像素級渲染機制球陰影 (Schmidt 網等面積投影逆算)
+            const imgData = ctx.createImageData(W, H);
+            for (let y = 0; y < H; y++) {
+                for (let x = 0; x < W; x++) {
+                    const dx = x - cx;
+                    const dy = y - cy;
+                    const r_pixel = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (r_pixel <= R) {
+                        const idx = (y * W + x) * 4;
+                        
+                        // Schmidt 投影公式: r = R * sqrt(2) * sin(i/2) -> sin(i/2) = r / (R * sqrt(2))
+                        const sin_i_2 = r_pixel / (R * Math.sqrt(2));
+                        const clamped_sin = Math.min(1, Math.max(0, sin_i_2));
+                        const i_rad = 2 * Math.asin(clamped_sin);
+                        
+                        let az_rad = Math.atan2(dx, -dy);
+                        if (az_rad < 0) az_rad += 2 * Math.PI;
+                        
+                        // 射線方向向量 gamma (NED系統: x=北, y=東, z=下)
+                        const gamma_x = Math.cos(az_rad) * Math.sin(i_rad);
+                        const gamma_y = Math.sin(az_rad) * Math.sin(i_rad);
+                        const gamma_z = Math.cos(i_rad);
+                        
+                        // P波初動極性取決於 (gamma ‧ N) * (gamma ‧ U) 的正負
+                        const dotN = gamma_x * nx + gamma_y * ny + gamma_z * nz;
+                        const dotU = gamma_x * ux + gamma_y * uy + gamma_z * uz;
+                        
+                        if (dotN * dotU >= 0) {
+                            // 壓張區 (Compression): 藍色帶點透明感
+                            imgData.data[idx] = 66;
+                            imgData.data[idx+1] = 135;
+                            imgData.data[idx+2] = 245;
+                            imgData.data[idx+3] = 255;
+                        } else {
+                            // 拉張區 (Dilation): 純白
+                            imgData.data[idx] = 255;
+                            imgData.data[idx+1] = 255;
+                            imgData.data[idx+2] = 255;
+                            imgData.data[idx+3] = 255;
+                        }
+                    }
+                }
+            }
+            
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = W;
+            tempCanvas.height = H;
+            tempCanvas.getContext('2d').putImageData(imgData, 0, 0);
+            ctx.drawImage(tempCanvas, 0, 0);
+            
+            // 2. 繪製基底等面積網格與外框
+            ctx.strokeStyle = '#2D3748';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(cx, cy, R, 0, 2 * Math.PI);
+            ctx.stroke();
+            
+            // 十字參考虛線
+            ctx.strokeStyle = '#CBD5E0';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(cx - R, cy); ctx.lineTo(cx + R, cy);
+            ctx.moveTo(cx, cy - R); ctx.lineTo(cx, cy + R);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // 四個方位基點標籤
+            ctx.fillStyle = '#1A202C';
+            ctx.font = 'bold 14px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'bottom'; ctx.fillText('N', cx, cy - R - 6);
+            ctx.textBaseline = 'top'; ctx.fillText('S', cx, cy + R + 6);
+            ctx.textBaseline = 'middle';
+            ctx.textAlign = 'left'; ctx.fillText('E', cx + R + 8, cy);
+            ctx.textAlign = 'right'; ctx.fillText('W', cx - R - 8, cy);
+            
+            // 3. 繪製各觀測站投影點
+            stations.forEach(st => {
+                const proj = projectStation(st.azimuth, st.takeOff);
+                
+                // Schmidt 網投影圓心距離
+                const r_st = R * Math.sqrt(2) * Math.sin((proj.iPlot / 2) * Math.PI / 180);
+                const az_rad = proj.azPlot * Math.PI / 180;
+                
+                const x_st = cx + r_st * Math.sin(az_rad);
+                const y_st = cy - r_st * Math.cos(az_rad);
+                
+                ctx.lineWidth = 2;
+                if (st.polarity === '+') {
+                    // 壓張 (+) 實心紅點
+                    ctx.fillStyle = '#EF4444';
+                    ctx.strokeStyle = '#FFFFFF';
+                    ctx.beginPath();
+                    ctx.arc(x_st, y_st, 6, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    ctx.fillStyle = '#B91C1C';
+                    ctx.font = '11px sans-serif';
+                    ctx.textAlign = 'left';
+                    ctx.fillText(' ' + st.name + '(+)', x_st + 6, y_st);
+                } else if (st.polarity === '-') {
+                    // 拉張 (-) 空心藍圈
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.strokeStyle = '#3B82F6';
+                    ctx.beginPath();
+                    ctx.arc(x_st, y_st, 5, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    ctx.fillStyle = '#1D4ED8';
+                    ctx.font = '11px sans-serif';
+                    ctx.textAlign = 'left';
+                    ctx.fillText(' ' + st.name + '(-)', x_st + 6, y_st);
+                }
+            });
+        }
+
+        // 解析使用者自行輸入的 P25 行
+        document.getElementById('btnParse').addEventListener('click', () => {
+            const text = document.getElementById('p25Input').value;
+            const lines = text.split('\n');
+            let count = 0;
+            
+            lines.forEach(line => {
+                const trimmed = line.trim();
+                if (!trimmed) return;
+                const parts = trimmed.split(/\s+/);
+                if (parts.length >= 4) {
+                    const name = parts[0];
+                    const azimuth = parseFloat(parts[2]);
+                    const rawTakeOff = parts[3];
+                    
+                    let polarity = ' ';
+                    if (rawTakeOff.includes('+')) polarity = '+';
+                    else if (rawTakeOff.includes('-')) polarity = '-';
+                    
+                    const takeOff = parseFloat(rawTakeOff);
+                    
+                    if (!isNaN(azimuth) && !isNaN(takeOff) && (polarity==='+' || polarity==='-')) {
+                        // 檢查是否重複，若重複則更新
+                        const idx = stations.findIndex(s => s.name === name);
+                        if (idx >= 0) stations[idx] = { name, azimuth, takeOff, polarity };
+                        else stations.push({ name, azimuth, takeOff, polarity });
+                        count++;
+                    }
+                }
+            });
+            
+            if (count > 0) {
+                alert(`成功載入/更新 ${count} 個測站數據！`);
+                updateTable();
+                drawBeachball();
+            } else {
+                alert('未偵測到符合格式的測站數據，請確保包含 測站名、方位角、離去角與+/-極性。');
+            }
+        });
+
+        // 綁定監聽滑桿事件
+        ['strikeSlider', 'dipSlider', 'rakeSlider'].forEach(id => {
+            document.getElementById(id).addEventListener('input', drawBeachball);
+        });
+
+        // 初始化執行
+        updateTable();
+        drawBeachball();
+    </script>
+</body>
+</html>
